@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+
+{% block title %}Editar Compra - ZionX{% endblock %}
+{% block page_title %}✏️ Editar Compra{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Editar Compra #{{ compra.id }} - {{ producto.nombre }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('compras.editar', compra_id=compra.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    
+                    <!-- Información del producto (read-only) -->
+                    <div class="alert alert-info">
+                        <strong>Producto:</strong> {{ producto.nombre }}<br>
+                        <strong>Stock actual:</strong> {{ producto.stock }} unidades
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="cantidad" class="form-label">Cantidad *</label>
+                            <input type="number" class="form-control" id="cantidad" name="cantidad" 
+                                   min="1" step="1" value="{{ compra.cantidad }}" required>
+                            <div class="form-text">Cantidad de unidades compradas</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="costo_unitario" class="form-label">Costo Unitario ($) *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="costo_unitario" name="costo_unitario" 
+                                       step="0.01" min="0.01" value="{{ compra.costo_unitario }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="fecha" class="form-label">Fecha y Hora *</label>
+                        <input type="datetime-local" class="form-control" id="fecha" name="fecha" 
+                               value="{{ compra.fecha.replace(' ', 'T') if compra.fecha else '' }}" required>
+                        <div class="form-text">Fecha y hora de la compra</div>
+                    </div>
+
+                    <!-- Información adicional -->
+                    <div class="alert alert-warning">
+                        <strong><i class="bi bi-exclamation-triangle"></i> Nota:</strong><br>
+                        Editar la cantidad o costo unitario recalculará el costo promedio del producto.
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('compras.listado') }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

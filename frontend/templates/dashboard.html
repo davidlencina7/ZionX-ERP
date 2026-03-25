@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - ZionX{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Fecha actual -->
+    <div class="col-12 mb-3">
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-lightning-charge-fill me-3" style="font-size: 2rem;"></i>
+            <div>
+                <strong>💡 Nuevo: Sistema Operativo Simplificado</strong><br>
+                <small>Registra ventas y compras en menos de 10 segundos con asientos contables automáticos</small>
+                <a href="{{ url_for('operativo.index') }}" class="btn btn-warning btn-sm ms-3">
+                    <i class="bi bi-arrow-right-circle"></i> Ir al Sistema Operativo
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-12 mb-3">
+        <div class="alert alert-info">
+            {#
+              TEMPLATE DESHABILITADO
+              Este archivo ha sido deshabilitado para evitar superposiciones.
+              Usa 'dashboard_dict.html' en su lugar.
+              Si ves este mensaje, revisa el backend para que apunte al template correcto.
+            #}
+
+            <div style="padding:2rem; color:red; background:#fff3cd; border:2px solid #f5c6cb; font-size:1.5rem;">
+              <strong>Este template está deshabilitado.</strong><br>
+              Usa <code>dashboard_dict.html</code>.<br>
+              Si ves este mensaje, revisa la configuración del backend.
+            </div>
+                    <div>

@@ -1,0 +1,213 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard - ZionX{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Fecha actual -->
+    <div class="col-12 mb-3">
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-lightning-charge-fill me-3" style="font-size: 2rem;"></i>
+            <div>
+                <strong>💡 Nuevo: Sistema Operativo Simplificado</strong><br>
+                <small>Registra ventas y compras en menos de 10 segundos con asientos contables automáticos</small>
+                <a href="{{ url_for('operativo.index') }}" class="btn btn-warning btn-sm ms-3">
+                    <i class="bi bi-arrow-right-circle"></i> Ir al Sistema Operativo
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 mb-3">
+        <div class="alert alert-info">
+            <i class="bi bi-calendar-check"></i> <strong>Fecha:</strong> {{ data['fecha'] }}
+        </div>
+    </div>
+</div>
+
+<!-- Tarjetas de métricas principales -->
+<div class="row mb-4">
+    <!-- Ventas del día -->
+    <div class="col-md-3 d-flex">
+        <div class="card text-white bg-success mb-3 w-100 metric-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-1">Ventas Hoy</h6>
+                        <h3 class="mb-1 metric-value">{{ data['ventas_cantidad'] }}</h3>
+                        <small class="opacity-90">Ganancia: ${{ "%.2f"|format(data['ganancia_total']) }}</small>
+                    </div>
+                    <i class="bi bi-cash-coin" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Compras del día -->
+    <div class="col-md-3 d-flex">
+        <div class="card text-white bg-primary mb-3 w-100 metric-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-1">Compras Hoy</h6>
+                        <h3 class="mb-1 metric-value">{{ data['compras_cantidad'] }}</h3>
+                        <small class="opacity-90">Costo: ${{ "%.2f"|format(data['compras_costo']) }}</small>
+                    </div>
+                    <i class="bi bi-cart-plus" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Stock total -->
+    <div class="col-md-3 d-flex">
+        <div class="card text-white bg-info mb-3 w-100 metric-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-1">Stock Total</h6>
+                        <h3 class="mb-1 metric-value">{{ data['stock_total'] }}</h3>
+                        <small class="opacity-90">{{ data['total_productos'] }} productos</small>
+                    </div>
+                    <i class="bi bi-box-seam" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Ganancia acumulada -->
+    <div class="col-md-3 d-flex">
+        <div class="card text-white bg-warning mb-3 w-100 metric-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-1 text-dark">Ganancia Total</h6>
+                        <h3 class="mb-1 metric-value text-dark">${{ "%.2f"|format(data['ganancia_acumulada']) }}</h3>
+                        <small class="text-dark opacity-75">Acumulado</small>
+                    </div>
+                    <i class="bi bi-graph-up-arrow text-dark" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Acciones rápidas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h4 class="mb-3 section-title"><i class="bi bi-lightning-fill"></i> Acciones Rápidas</h4>
+        <div class="d-grid gap-2 d-md-flex flex-wrap">
+            <a href="{{ url_for('compras.index') }}" class="btn btn-primary btn-lg me-md-2 mb-2">
+                <i class="bi bi-cart-plus"></i> Registrar Compra
+            </a>
+            <a href="{{ url_for('ventas.index') }}" class="btn btn-success btn-lg me-md-2 mb-2">
+                <i class="bi bi-cash-coin"></i> Registrar Venta
+            </a>
+            <a href="{{ url_for('inventario.index') }}" class="btn btn-info btn-lg me-md-2 mb-2">
+                <i class="bi bi-box-seam"></i> Ver Inventario
+            </a>
+            <a href="{{ url_for('reportes.index') }}" class="btn btn-warning btn-lg me-md-2 mb-2">
+                <i class="bi bi-graph-up"></i> Ver Reportes
+            </a>
+            <a href="{{ url_for('gastos.index') }}" class="btn btn-danger btn-lg me-md-2 mb-2">
+                <i class="bi bi-wallet2"></i> Registrar Gastos
+            </a>
+            <a href="{{ url_for('activos.index') }}" class="btn btn-secondary btn-lg mb-2">
+                <i class="bi bi-building"></i> Activos/Inversiones
+            </a>
+            <a href="{{ url_for('sistema.descargar_backup') }}" class="btn btn-dark btn-lg mb-2">
+                <i class="bi bi-download"></i> Backup Base de Datos
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos -->
+<div class="row mb-4" 
+     data-chart-labels='{{ data['chart_labels'] | tojson }}'
+     data-chart-ventas='{{ data['chart_ventas'] | tojson }}'
+     data-chart-compras='{{ data['chart_compras'] | tojson }}'
+     data-chart-top-labels='{{ data['chart_top_productos_labels'] | tojson }}'
+     data-chart-top-data='{{ data['chart_top_productos_data'] | tojson }}'>
+    <div class="col-md-8 mb-3">
+        <div class="card shadow-sm animate-fade-in-up">
+            <div class="card-header bg-gradient-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Ventas vs Compras (Últimos 7 Días)
+                </h5>
+            </div>
+            <div class="card-body" style="height: 350px;">
+                <canvas id="ventasComprasChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm animate-fade-in-up">
+            <div class="card-header bg-gradient-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-star me-2"></i>Top 5 Productos
+                </h5>
+            </div>
+            <div class="card-body" style="height: 350px;">
+                <canvas id="topProductosChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alertas de stock bajo -->
+{% if data['productos_bajo_stock'] > 0 %}
+<div class="row">
+    <div class="col-12">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Productos con Stock Bajo ({{ data['productos_bajo_stock'] }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Stock Actual</th>
+                                <th>Stock Mínimo</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in data['productos_bajo_stock_lista'] %}
+                            <tr>
+                                <td><strong>{{ producto['nombre'] }}</strong></td>
+                                <td>
+                                    <span class="badge bg-danger">{{ producto['stock_actual'] }}</span>
+                                </td>
+                                <td>{{ producto['stock_minimo'] }}</td>
+                                <td>
+                                    <a href="{{ url_for('compras.index') }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-cart-plus"></i> Comprar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle"></i> <strong>¡Todo en orden!</strong> No hay productos con stock bajo.
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<!-- Dashboard Module -->
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

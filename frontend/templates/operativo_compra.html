@@ -1,0 +1,199 @@
+{% extends "layout.html" %}
+
+{% block title %}Nueva Compra - ZionX{% endblock %}
+{% block page_title %}🔵 Nueva Compra{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/formularios.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('operativo.nueva_compra') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    
+    <!-- Selección de Producto -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <label for="producto" class="form-label">1️⃣ Producto</label>
+            <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+                <select class="form-select" name="producto" id="producto" required>
+                    <option value="">Seleccionar producto...</option>
+                    <option value="pollo entero">🐔 Pollo entero</option>
+                    <option value="pata muslo">🍗 Pata muslo</option>
+                    <option value="maple huevo">📦 Maple huevo</option>
+                    <option value="huevo unidad">🥚 Huevo unidad</option>
+                </select>
+            </div>
+            <div class="mt-2">
+                <small class="text-muted">
+                    <strong>Stock actual:</strong> <span id="stock-actual">Seleccione un producto</span>
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cantidad -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <label for="cantidad" class="form-label">2️⃣ Cantidad (kg o unidades)</label>
+            <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-123"></i></span>
+                <input type="number" class="form-control" name="cantidad" id="cantidad" 
+                       placeholder="0" min="1" step="0.1" required>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <label for="costo_total" class="form-label">3️⃣ Costo Total Pagado</label>
+            <div class="input-group input-group-lg">
+                <span class="input-group-text">$</span>
+                <input type="number" class="form-control" name="costo_total" id="costo_total" 
+                       placeholder="0.00" min="0" step="0.01" required>
+            </div>
+            <div class="mt-2">
+                <small class="text-muted">
+                    <strong>Costo unitario:</strong> $<span id="costo-unitario">0.00</span>
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Proveedor -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <label for="proveedor" class="form-label">4️⃣ Proveedor</label>
+            <div class="input-group input-group-lg">
+                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                <input type="text" class="form-control" name="proveedor" id="proveedor" 
+                       placeholder="Nombre del proveedor" required>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Resumen -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-producto">
+                <h5 class="mb-3">📋 Resumen de Compra</h5>
+                <div class="row">
+                    <div class="col-6 col-md-3 mb-2">
+                        <strong>Producto:</strong><br>
+                        <span id="resumen-producto">-</span>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <strong>Cantidad:</strong><br>
+                        <span id="resumen-cantidad">-</span>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <strong>Costo Unit:</strong><br>
+                        $<span id="resumen-costo-unit">0.00</span>
+                    </div>
+                    <div class="col-6 col-md-3 mb-2">
+                        <strong>Total:</strong><br>
+                        $<span id="resumen-total">0.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Botón de registro -->
+    <div class="row">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary btn-registrar w-100">
+                ✅ Registrar Compra
+            </button>
+        </div>
+    </div>
+    
+    <div class="row mt-3">
+        <div class="col-12">
+            <a href="{{ url_for('operativo.index') }}" class="btn btn-secondary btn-lg w-100">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== INICIANDO MÓDULO OPERATIVO COMPRA ===');
+    
+    // Datos de productos (JSON serializado desde Python)
+    const productosData = {{ productos | tojson }};
+    console.log('📦 Datos de productos cargados:', productosData);
+    console.log('📦 Keys de productos:', Object.keys(productosData));
+    
+    const productoSelect = document.getElementById('producto');
+    const cantidadInput = document.getElementById('cantidad');
+    const costoTotalInput = document.getElementById('costo_total');
+    
+    console.log('✅ Elementos del DOM encontrados:', {
+        productoSelect: !!productoSelect,
+        cantidadInput: !!cantidadInput,
+        costoTotalInput: !!costoTotalInput
+    });
+    
+    // Actualizar stock al seleccionar producto
+    productoSelect.addEventListener('change', function() {
+        console.log('🖱️ Cambio en selector de producto');
+        const producto = this.value;
+        console.log('  Producto seleccionado:', producto);
+        
+        if (producto && productosData[producto]) {
+            console.log('  ℹ️ Datos del producto:', productosData[producto]);
+            const stockText = productosData[producto].stock + ' unidades';
+            document.getElementById('stock-actual').textContent = stockText;
+            document.getElementById('resumen-producto').textContent = producto;
+            console.log('  ✅ Stock actualizado:', stockText);
+        } else {
+            console.log('  ⚠️ Producto no encontrado o vacío');
+            document.getElementById('stock-actual').textContent = 'Seleccione un producto';
+            document.getElementById('resumen-producto').textContent = '-';
+        }
+        calcularCostoUnitario();
+    });
+    
+    // Calcular costo unitario
+    function calcularCostoUnitario() {
+        console.log('🧮 Calculando costo unitario');
+        const cantidad = parseFloat(cantidadInput.value) || 0;
+        const costoTotal = parseFloat(costoTotalInput.value) || 0;
+        
+        console.log('  Cantidad:', cantidad);
+        console.log('  Costo total:', costoTotal);
+        
+        if (cantidad > 0 && costoTotal > 0) {
+            const costoUnitario = costoTotal / cantidad;
+            console.log('  ✅ Costo unitario calculado:', costoUnitario);
+            document.getElementById('costo-unitario').textContent = costoUnitario.toFixed(2);
+            document.getElementById('resumen-costo-unit').textContent = costoUnitario.toFixed(2);
+        } else {
+            console.log('  ⚠️ Valores insuficientes para calcular');
+            document.getElementById('costo-unitario').textContent = '0.00';
+            document.getElementById('resumen-costo-unit').textContent = '0.00';
+        }
+        
+        // Actualizar resumen
+        document.getElementById('resumen-cantidad').textContent = cantidad > 0 ? cantidad : '-';
+        document.getElementById('resumen-total').textContent = costoTotal.toFixed(2);
+        console.log('  📊 Resumen actualizado');
+    }
+    
+    cantidadInput.addEventListener('input', function() {
+        console.log('⌨️ Input en cantidad:', this.value);
+        calcularCostoUnitario();
+    });
+    
+    costoTotalInput.addEventListener('input', function() {
+        console.log('⌨️ Input en costo total:', this.value);
+        calcularCostoUnitario();
+    });
+    
+    console.log('=== INICIALIZACIÓN COMPLETADA ===');
+});
+</script>
+{% endblock %}

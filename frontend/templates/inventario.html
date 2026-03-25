@@ -1,0 +1,176 @@
+{% extends "layout.html" %}
+
+{% block title %}Inventario - ZionX{% endblock %}
+{% block page_title %}Inventario de Productos{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/inventario.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Métricas del inventario -->
+<div class="inventory-metrics">
+    <div class="metric-card info">
+        <div class="metric-icon">
+            <i class="bi bi-box-seam"></i>
+        </div>
+        <div class="metric-content">
+            <div class="metric-label"><i class="bi bi-box-seam me-2"></i>Total Productos</div>
+            <div class="metric-value">{{ metricas.total_productos }}</div>
+        </div>
+    </div>
+    <div class="metric-card primary">
+        <div class="metric-icon">
+            <i class="bi bi-stack"></i>
+        </div>
+        <div class="metric-content">
+            <div class="metric-label"><i class="bi bi-stack me-2"></i>Stock Total</div>
+            <div class="metric-value">{{ metricas.stock_total }}</div>
+            <div class="metric-unit">unidades</div>
+        </div>
+    </div>
+    <div class="metric-card success">
+        <div class="metric-icon">
+            <i class="bi bi-currency-dollar"></i>
+        </div>
+        <div class="metric-content">
+            <div class="metric-label"><i class="bi bi-currency-dollar me-2"></i>Valor Inventario</div>
+            <div class="metric-value">${{ "%.2f"|format(metricas.valor_inventario) }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de productos -->
+<div class="inventory-table-container mb-4">
+    <div style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+        <h4 class="mb-0"><i class="bi bi-box-seam me-2"></i>Lista de Productos</h4>
+        <div>
+            <a href="{{ url_for('inventario.exportar') }}" class="btn btn-sm btn-success me-2">
+                <i class="bi bi-file-earmark-excel"></i> Exportar
+            </a>
+            <a href="{{ url_for('inventario.crear_producto') }}" class="btn btn-sm btn-primary">
+                <i class="bi bi-plus-circle"></i> Nuevo
+            </a>
+        </div>
+    </div>
+    <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color);">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" class="form-control" placeholder="Buscar por nombre, código o stock...">
+        </div>
+    </div>
+    {% if productos|length > 0 %}
+    <div class="table-responsive">
+        <table class="table inventory-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Stock Actual</th>
+                    <th>Stock Mínimo</th>
+                    <th>Costo Prom.</th>
+                    <th>Margen</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td><span class="product-id">#{{ producto.id }}</span></td>
+                    <td><span class="product-name">{{ producto.nombre }}</span></td>
+                    <td class="text-center"><strong>{{ producto.stock_actual }}</strong></td>
+                    <td class="text-center">{{ producto.stock_minimo }}</td>
+                    <td>${{ "%.2f"|format(producto.costo_promedio) }}</td>
+                    <td class="text-center">{{ producto.margen_venta }}%</td>
+                    <td>
+                        {% if producto.stock_actual == 0 %}
+                            <span class="status-badge dark">Sin Stock</span>
+                        {% elif producto.stock_actual <= producto.stock_minimo %}
+                            <span class="status-badge danger">Bajo</span>
+                        {% elif producto.stock_actual <= producto.stock_minimo * 2 %}
+                            <span class="status-badge warning">Medio</span>
+                        {% else %}
+                            <span class="status-badge success">OK</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('inventario.detalle_producto', producto_id=producto.id) }}" 
+                               class="btn-action info" title="Ver Detalle">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ url_for('inventario.editar_producto', producto_id=producto.id) }}" 
+                               class="btn-action warning" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('inventario.eliminar_producto', producto_id=producto.id) }}" 
+                                  style="display: inline;"
+                                  onsubmit="return confirm('⚠️ ¿Eliminar {{ producto.nombre }}?\n\nSolo es posible si no tiene ventas ni compras.');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="btn-action danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="padding: 2rem; text-align: center;">
+        <div class="inventory-alert warning">
+            <i class="bi bi-exclamation-triangle"></i> No hay productos registrados en el inventario.
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+        <!-- Leyenda -->
+        <div class="inventory-legend">
+            <div class="legend-title"><i class="bi bi-info-circle me-2"></i>Leyenda de Estados</div>
+            <div class="legend-grid">
+                <div class="legend-item">
+                    <span class="legend-badge" style="background: rgba(25, 135, 84, 0.2); color: #198754;">OK</span>
+                    <span class="legend-text">Mayor al doble del stock mínimo</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-badge" style="background: rgba(255, 193, 7, 0.2); color: #ff9800;">MEDIO</span>
+                    <span class="legend-text">Entre stock mínimo y su doble</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-badge" style="background: rgba(220, 53, 69, 0.2); color: #dc3545;">BAJO</span>
+                    <span class="legend-text">Igual o menor al stock mínimo</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-badge" style="background: rgba(33, 37, 41, 0.2); color: #212529;">SIN STOCK</span>
+                    <span class="legend-text">Stock agotado</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/inventario.js') }}"></script>
+<style>
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.6);
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+        to {
+            transform: scale(3);
+            opacity: 0;
+        }
+    }
+</style>
+{% endblock %}

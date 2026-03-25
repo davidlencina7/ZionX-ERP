@@ -1,0 +1,173 @@
+{% extends "layout.html" %}
+
+{% block title %}Reportes - ZionX{% endblock %}
+{% block page_title %}Reportes y Estadísticas{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/reportes.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Información del reporte -->
+<div class="report-alert info mb-4">
+    <i class="bi bi-calendar-check"></i> <strong>Reporte generado:</strong> {{ reporte.fecha }}
+</div>
+
+<!-- Tarjetas de métricas -->
+<div class="row mb-4">
+    <!-- Ventas del día -->
+    <div class="col-md-6 mb-3">
+        <div class="report-card success">
+            <div class="report-header">
+                <i class="bi bi-cash-coin"></i>Ventas del Día
+            </div>
+            <div class="report-metric">
+                <div>
+                    <div class="metric-label">Cantidad de Ventas</div>
+                    <div class="metric-value" style="color: #198754;">{{ reporte.ventas_cantidad }}</div>
+                </div>
+            </div>
+            <div class="report-metric">
+                <div>
+                    <div class="metric-label">Ganancia Total</div>
+                    <div class="metric-value" style="color: #198754;">${{ "%.2f"|format(reporte.ganancia_total) }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compras del día -->
+    <div class="col-md-6 mb-3">
+        <div class="report-card primary">
+            <div class="report-header">
+                <i class="bi bi-cart-plus"></i>Compras del Día
+            </div>
+            <div class="report-metric">
+                <div>
+                    <div class="metric-label">Cantidad de Compras</div>
+                    <div class="metric-value" style="color: #0d6efd;">{{ reporte.compras_cantidad }}</div>
+                </div>
+            </div>
+            <div class="report-metric">
+                <div>
+                    <div class="metric-label">Costo Total</div>
+                    <div class="metric-value" style="color: #0d6efd;">${{ "%.2f"|format(reporte.compras_costo) }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas generales -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="report-card info">
+            <div class="report-header">
+                <i class="bi bi-box-seam"></i>Inventario
+            </div>
+            <div class="report-metric">
+                <div>
+                    <div class="metric-label">Stock Total</div>
+                    <div class="metric-value" style="color: #0dcaf0;">{{ reporte.stock_total }}</div>
+                    <span class="metric-label">unidades</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="report-card warning">
+            <div class="report-header">
+                <i class="bi bi-graph-up-arrow"></i>Ganancia Acumulada
+            </div>
+            <div class="report-metric">
+                <div>
+                    <div class="metric-label">Total Histórico</div>
+                    <div class="metric-value" style="color: #ff9800;">${{ "%.2f"|format(reporte.ganancia_acumulada) }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Productos bajo stock -->
+<div class="row">
+    <div class="col-12">
+        <div class="report-card {% if reporte.productos_bajo_stock|length > 0 %}danger{% else %}success{% endif %}">
+            <div class="report-header">
+                <i class="bi bi-exclamation-triangle"></i>Productos con Stock Bajo ({{ reporte.productos_bajo_stock|length }})
+            </div>
+            {% if reporte.productos_bajo_stock|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table report-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Producto</th>
+                                <th>Stock Actual</th>
+                                <th>Stock Mínimo</th>
+                                <th>Diferencia</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in reporte.productos_bajo_stock %}
+                            <tr>
+                                <td><span style="color: #dc3545; font-weight: 600;">#{{ producto.id }}</span></td>
+                                <td><strong>{{ producto.nombre }}</strong></td>
+                                <td>
+                                    <span class="status-badge danger">{{ producto.stock_actual }}</span>
+                                </td>
+                                <td class="text-center">{{ producto.stock_minimo }}</td>
+                                <td>
+                                    <span class="status-badge warning">
+                                        {{ producto.stock_minimo - producto.stock_actual }} unidades faltantes
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('compras.index') }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-cart-plus"></i> Comprar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="report-alert success">
+                    <i class="bi bi-check-circle"></i> <strong>¡Excelente!</strong> Todos los productos tienen stock adecuado.
+                </div>
+                {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Botones de acción -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="report-actions" style="justify-content: center;">
+            <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i> Volver al Dashboard
+            </a>
+            <button onclick="window.print()" class="btn btn-primary btn-report">
+                <i class="bi bi-printer"></i> Imprimir Reporte
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/reportes.js') }}"></script>
+<style>
+    @media print {
+        .btn, .sidebar, nav, .report-actions {
+            display: none !important;
+        }
+        .report-card {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}

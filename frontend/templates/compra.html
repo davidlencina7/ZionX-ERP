@@ -1,0 +1,126 @@
+{% extends "layout.html" %}
+
+{% block title %}Registrar Compra - ZionX{% endblock %}
+{% block page_title %}Registrar Compra{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="bi bi-cart-plus me-2"></i>Formulario de Compra</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('compras.registrar') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    
+                    <!-- Selección de producto -->
+                    <div class="mb-4">
+                        <label for="producto_id" class="form-label"><i class="bi bi-box-seam me-2"></i>Producto *</label>
+                        <select class="form-select" id="producto_id" name="producto_id" required>
+                            <option value="" selected disabled>-- Seleccionar Producto --</option>
+                            {% for producto in productos %}
+                            <option value="{{ producto.id }}">
+                                {{ producto.nombre }} (Stock: {{ producto.stock_actual }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Selecciona el producto a comprar</div>
+                    </div>
+
+                    <!-- Cantidad -->
+                    <div class="mb-4">
+                        <label for="cantidad" class="form-label"><i class="bi bi-123 me-2"></i>Cantidad *</label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="cantidad" 
+                               name="cantidad" 
+                               min="1" 
+                               step="1" 
+                               placeholder="Ej: 50"
+                               required>
+                        <div class="form-text">Cantidad de unidades a comprar (entero positivo)</div>
+                    </div>
+
+                    <!-- Costo unitario -->
+                    <div class="mb-4">
+                        <label for="costo_unitario" class="form-label"><i class="bi bi-currency-dollar me-2"></i>Costo Unitario ($) *</label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="costo_unitario" 
+                               name="costo_unitario" 
+                               min="0.01" 
+                               step="0.01" 
+                               placeholder="Ej: 15.50"
+                               required>
+                        <div class="form-text">Costo por unidad del producto</div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Botones -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('compras.listado') }}" class="btn btn-outline-info">
+                            <i class="bi bi-list-ul"></i> Ver Historial
+                        </a>
+                        <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Registrar Compra
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="card-title"><i class="bi bi-info-circle"></i> Información</h6>
+                <ul class="mb-0">
+                    <li>La compra actualizará el stock del producto automáticamente</li>
+                    <li>El costo promedio se recalculará usando el método PEPS</li>
+                    <li>Todos los campos son obligatorios</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+console.log('🔥 REGISTRAR COMPRA CARGADO - INICIO');
+console.log('🔥 Timestamp:', new Date().toISOString());
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== INICIALIZANDO REGISTRAR COMPRA ===');
+    
+    // Verificar formulario
+    const form = document.querySelector('form');
+    console.log('📝 Formulario encontrado:', !!form);
+    
+    // Verificar selects
+    const productoSelect = document.getElementById('producto_id');
+    const cantidadInput = document.getElementById('cantidad');
+    const costoInput = document.getElementById('costo_unitario');
+    
+    console.log('✅ Elementos del formulario:', {
+        productoSelect: !!productoSelect,
+        cantidadInput: !!cantidadInput,
+        costoInput: !!costoInput
+    });
+    
+    // Contar opciones de productos
+    if (productoSelect) {
+        const options = productoSelect.querySelectorAll('option').length - 1;
+        console.log('📦 Productos disponibles:', options);
+    }
+    
+    console.log('=== REGISTRAR COMPRA READY ===');
+});
+
+console.log('🔥 REGISTRAR COMPRA CARGADO - FIN');
+</script>
+{% endblock %}

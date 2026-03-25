@@ -1,0 +1,166 @@
+{% extends "layout.html" %}
+
+{% block title %}Historial de Ventas - ZionX{% endblock %}
+{% block page_title %}📊 Historial de Ventas{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Métricas Modernas -->
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white mb-1"><small>Ventas Totales</small></h6>
+                        <h2 class="mb-0">{{ ventas|length }}</h2>
+                    </div>
+                    <div>
+                        <i class="bi bi-graph-up" style="font-size: 3rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white mb-1"><small>Ingresos</small></h6>
+                        <h2 class="mb-0">${{ "%.2f"|format(total_ingresos) }}</h2>
+                    </div>
+                    <div>
+                        <i class="bi bi-cash-stack" style="font-size: 3rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title text-white mb-1"><small>Ganancia</small></h6>
+                        <h2 class="mb-0">${{ "%.2f"|format(total_ganancia) }}</h2>
+                    </div>
+                    <div>
+                        <i class="bi bi-trophy" style="font-size: 3rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Ventas Registradas</h5>
+                <div>
+                    <a href="{{ url_for('ventas.exportar') }}" class="btn btn-success me-2">
+                        <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+                    </a>
+                    <a href="{{ url_for('ventas.index') }}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Nueva Venta
+                    </a>
+                    <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-house"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Filtros -->
+                <form method="GET" class="row g-3 mb-4 p-3" style="background: var(--card-bg); border-radius: 12px;">
+                    <div class="col-md-8">
+                        <label for="fecha" class="form-label"><i class="bi bi-calendar3 me-2"></i>Filtrar por Fecha</label>
+                        <input type="date" class="form-control" id="fecha" name="fecha" value="{{ fecha_filtro }}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+                        <a href="{{ url_for('ventas.listado') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-clockwise me-1"></i>Limpiar</a>
+                    </div>
+                </form>
+
+                <!-- Tabla de ventas -->
+                <div class="table-responsive">
+                    <form id="form-eliminar-multiples" method="POST" action="{{ url_for('ventas.eliminar_multiples') }}">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="check-todas" onclick="toggleSeleccionTodas(this)"></th>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unit.</th>
+                                    <th>Total</th>
+                                    <th>Ganancia</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if ventas %}
+                                    {% for venta in ventas %}
+                                    <tr>
+                                        <td><input type="checkbox" name="ventas_ids" value="{{ venta.id }}" class="check-venta"></td>
+                                        <td>{{ venta.id }}</td>
+                                        <td>{{ venta.fecha }}</td>
+                                        <td>{{ venta.producto_nombre }}</td>
+                                        <td>{{ venta.cantidad }}</td>
+                                        <td>${{ "%.2f"|format(venta.precio_unitario) }}</td>
+                                        <td class="text-success fw-bold">${{ "%.2f"|format(venta.precio_unitario * venta.cantidad) }}</td>
+                                        <td class="text-primary">${{ "%.2f"|format(venta.ganancia_unitaria * venta.cantidad) }}</td>
+                                        <td>
+                                            <a href="{{ url_for('ventas.editar', venta_id=venta.id) }}" 
+                                               class="btn btn-sm btn-warning" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form method="POST" action="{{ url_for('ventas.eliminar', venta_id=venta.id) }}" 
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('¿Eliminar esta venta? Se restaurará el stock.');">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted">No hay ventas registradas</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                        <div class="mt-2">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-danger" onclick="return confirmarEliminacionMultiple();">
+                                <i class="bi bi-trash"></i> Eliminar seleccionadas
+                            </button>
+                        </div>
+                    </form>
+                    <script>
+                        function toggleSeleccionTodas(source) {
+                            let checkboxes = document.querySelectorAll('.check-venta');
+                            for (let i = 0; i < checkboxes.length; i++) {
+                                checkboxes[i].checked = source.checked;
+                            }
+                        }
+                        function confirmarEliminacionMultiple() {
+                            let seleccionadas = document.querySelectorAll('.check-venta:checked');
+                            if (seleccionadas.length === 0) {
+                                alert('Seleccione al menos una venta para eliminar.');
+                                return false;
+                            }
+                            return confirm('¿Eliminar las ventas seleccionadas? Se restaurará el stock de cada una.');
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

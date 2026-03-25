@@ -1,0 +1,6 @@
+# requirements.txt de ejemplo para ZionX ERP
+Flask>=2.2.0
+SQLAlchemy>=1.4.0
+psycopg2-binary>=2.9.0
+python-dotenv>=0.21.0
+# Agrega aquí otros paquetes necesarios para tu proyecto

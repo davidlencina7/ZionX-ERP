@@ -1,0 +1,158 @@
+{% extends "layout.html" %}
+
+{% block title %}Operativo - ZionX{% endblock %}
+{% block page_title %}Sistema Operativo{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/operativo.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Caja del día -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="caja-del-dia text-center">
+            <div class="label">💰 Caja del Día</div>
+            <h2 class="caja-monto">${{ "%.2f"|format(caja_hoy) }}</h2>
+            <div class="mt-2 caja-detalles">
+                <small class="d-inline-block mx-2">
+                    <strong>Ventas:</strong> {{ ventas_hoy }}
+                </small>
+                <small class="d-inline-block mx-2">
+                    <strong>Balance:</strong> ${{ "%.2f"|format(balance_hoy) }}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4 Botones Principales -->
+<div class="row g-4">
+    <div class="col-sm-6 col-xl-3 d-flex">
+        <a href="{{ url_for('operativo.nueva_venta') }}" class="btn btn-success btn-operativo w-100">
+            <i class="bi bi-cash-coin"></i>
+            <span>Nueva Venta</span>
+        </a>
+    </div>
+    
+    <div class="col-sm-6 col-xl-3 d-flex">
+        <a href="{{ url_for('operativo.nueva_compra') }}" class="btn btn-primary btn-operativo w-100">
+            <i class="bi bi-cart-plus"></i>
+            <span>Nueva Compra</span>
+        </a>
+    </div>
+    
+    <div class="col-sm-6 col-xl-3 d-flex">
+        <a href="{{ url_for('inventario.index') }}" class="btn btn-info btn-operativo w-100">
+            <i class="bi bi-box-seam"></i>
+            <span>Ver Stock</span>
+        </a>
+    </div>
+    
+    <div class="col-sm-6 col-xl-3 d-flex">
+        <a href="{{ url_for('gerencial.index') }}" class="btn btn-warning btn-operativo w-100">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Panel Gerencial</span>
+        </a>
+    </div>
+</div>
+
+<!-- Alertas de stock bajo (si las hay) -->
+{% if productos_bajo_stock > 0 %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-danger operativo-alert d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 2rem;"></i>
+            <div>
+                <strong>⚠️ Atención:</strong> Hay {{ productos_bajo_stock }} producto(s) con stock bajo
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Últimas operaciones del día -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card shadow-sm animate-fade-in-up">
+            <div class="card-header bg-gradient-info text-white">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Últimas Operaciones Hoy</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped operativo-table">
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Tipo</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Monto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for op in ultimas_operaciones %}
+                            <tr>
+                                <td>{{ op.hora }}</td>
+                                <td>
+                                    {% if op.tipo == 'venta' %}
+                                    <span class="badge bg-success">Venta</span>
+                                    {% else %}
+                                    <span class="badge bg-primary">Compra</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ op.producto }}</td>
+                                <td>{{ op.cantidad }}</td>
+                                <td>${{ "%.2f"|format(op.monto) }}</td>
+                                <td>
+                                    {% if op.tipo == 'venta' %}
+                                    <a href="{{ url_for('operativo.editar_venta', venta_id=op.id) }}" 
+                                       class="btn btn-sm btn-outline-warning" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('operativo.eliminar_venta', venta_id=op.id) }}" 
+                                          style="display: inline;" onsubmit="return confirm('¿Eliminar esta venta?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <a href="{{ url_for('operativo.editar_compra', compra_id=op.id) }}" 
+                                       class="btn btn-sm btn-outline-warning" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('operativo.eliminar_compra', compra_id=op.id) }}" 
+                                          style="display: inline;" onsubmit="return confirm('¿Eliminar esta compra?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if ultimas_operaciones|length == 0 %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    No hay operaciones registradas hoy
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// El sistema operativo usa las animaciones de app.js
+console.log('✅ Sistema Operativo Moderno Cargado');
+</script>
+{% endblock %}

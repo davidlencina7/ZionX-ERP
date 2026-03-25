@@ -1,0 +1,167 @@
+{% extends "layout.html" %}
+
+{% block title %}Registrar Venta - ZionX{% endblock %}
+{% block page_title %}Registrar Venta{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="bi bi-cash-coin me-2"></i>Formulario de Venta</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('ventas.registrar') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <!-- Forma de Pago -->
+                    <div class="mb-4">
+                        <label class="form-label"><i class="bi bi-wallet2 me-2"></i>Forma de Pago *</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-outline-primary forma-pago-btn flex-fill" data-forma="efectivo">EFECTIVO</button>
+                            <button type="button" class="btn btn-outline-info forma-pago-btn flex-fill" data-forma="transferencia">TRANSFERENCIA</button>
+                            <button type="button" class="btn btn-outline-success forma-pago-btn flex-fill" data-forma="debito">DÉBITO</button>
+                            <button type="button" class="btn btn-outline-warning forma-pago-btn flex-fill" data-forma="credito">CRÉDITO</button>
+                        </div>
+                        <input type="hidden" name="forma_pago" id="forma_pago" value="efectivo">
+                    </div>
+                    
+                    <!-- Selección de producto -->
+                    <div class="mb-4">
+                        <label for="producto_id" class="form-label"><i class="bi bi-box-seam me-2"></i>Producto *</label>
+                        <select class="form-select" id="producto_id" name="producto_id" required>
+                            <option value="" selected disabled>-- Seleccionar Producto --</option>
+                            {% for producto in productos %}
+                            <option value="{{ producto.id }}" 
+                                    {% if producto.stock_actual == 0 %}disabled{% endif %}>
+                                {{ producto.nombre }} 
+                                (Stock: {{ producto.stock_actual }})
+                                {% if producto.stock_actual == 0 %}[SIN STOCK]{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Selecciona el producto a vender</div>
+                    </div>
+
+                    <!-- Cantidad -->
+                    <div class="mb-4">
+                        <label for="cantidad" class="form-label"><i class="bi bi-123 me-2"></i>Cantidad *</label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="cantidad" 
+                               name="cantidad" 
+                               min="1" 
+                               step="1" 
+                               placeholder="Ej: 10"
+                               required>
+                        <div class="form-text">Cantidad de unidades a vender (entero positivo)</div>
+                    </div>
+
+                    <!-- Precio unitario -->
+                    <div class="mb-4">
+                        <label for="precio_unitario" class="form-label"><i class="bi bi-currency-dollar me-2"></i>Precio Unitario ($) *</label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="precio_unitario" 
+                               name="precio_unitario" 
+                               min="0.01" 
+                               step="0.01" 
+                               placeholder="Ej: 25.00"
+                               required>
+                        <div class="form-text">Precio de venta por unidad</div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Botones -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('ventas.listado') }}" class="btn btn-outline-info">
+                            <i class="bi bi-list-ul"></i> Ver Historial
+                        </a>
+                        <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Registrar Venta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="card mt-3">
+            <div class="card-body">
+                <h6 class="card-title"><i class="bi bi-info-circle"></i> Información</h6>
+                <ul class="mb-0">
+                    <li>La venta <strong>validará el stock</strong> automáticamente</li>
+                    <li>Si el stock es insuficiente, se mostrará un error</li>
+                    <li>El stock se descontará al registrar la venta</li>
+                    <li>La ganancia se calculará usando el costo promedio</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Selector visual de forma de pago
+document.addEventListener('DOMContentLoaded', function() {
+    const formaBtns = document.querySelectorAll('.forma-pago-btn');
+    const formaInput = document.getElementById('forma_pago');
+    if (formaBtns && formaInput) {
+        formaBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                formaBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                formaInput.value = this.getAttribute('data-forma');
+            });
+        });
+        // Por defecto, marcar efectivo
+        formaBtns[0].classList.add('active');
+    }
+});
+console.log('🔥 REGISTRAR VENTA CARGADO - INICIO');
+console.log('🔥 Timestamp:', new Date().toISOString());
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== INICIALIZANDO REGISTRAR VENTA ===');
+    
+    // Verificar formulario
+    const form = document.querySelector('form');
+    console.log('📝 Formulario encontrado:', !!form);
+    
+    // Verificar selects
+    const productoSelect = document.getElementById('producto_id');
+    const cantidadInput = document.getElementById('cantidad');
+    const precioInput = document.getElementById('precio_unitario');
+    
+    console.log('✅ Elementos del formulario:', {
+        productoSelect: !!productoSelect,
+        cantidadInput: !!cantidadInput,
+        precioInput: !!precioInput
+    });
+    
+    // Contar opciones de productos
+    if (productoSelect) {
+        const options = productoSelect.querySelectorAll('option').length - 1; // Menos la opción vacía
+        console.log('📦 Productos disponibles:', options);
+    }
+    
+    // Advertencia al seleccionar producto con stock bajo
+    document.getElementById('producto_id').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const stockText = selectedOption.text.match(/Stock: (\d+)/);
+        if (stockText && parseInt(stockText[1]) < 10) {
+            console.warn('⚠️ Stock bajo detectado:', stockText[1], 'unidades');
+            alert('⚠️ Advertencia: Este producto tiene stock bajo (' + stockText[1] + ' unidades)');
+        }
+    });
+    
+    console.log('=== REGISTRAR VENTA READY ===');
+});
+
+console.log('🔥 REGISTRAR VENTA CARGADO - FIN');
+</script>
+{% endblock %}

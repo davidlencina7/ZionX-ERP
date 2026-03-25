@@ -1,0 +1,117 @@
+{% extends 'layout.html' %}
+{% block title %}Control de Estabilidad{% endblock %}
+{% block page_title %}Control de Estabilidad{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Control de Estabilidad y Diagnóstico</h2>
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+            <div class="card text-center shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Estado General del Sistema</h5>
+                    <span id="estado-global-badge" class="badge bg-success fs-5">Óptimo</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Diagnóstico Detallado</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Componente</th>
+                                    <th>Estado</th>
+                                    <th>Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                    <tr data-detalle="Conexión exitosa, tiempo de respuesta: 120ms, DB: PostgreSQL">
+                                        <td>Base de Datos</td>
+                                        <td><span class="badge bg-success">OK</span></td>
+                                        <td>
+                                            Conexión exitosa
+                                            <button class="btn btn-sm btn-outline-info ms-2 btn-detalle">Ver más</button>
+                                            <button class="btn btn-sm btn-outline-warning ms-2 btn-reintentar">Reintentar</button>
+                                        </td>
+                                    </tr>
+                                    <tr data-detalle="Persistencia sin errores, última escritura: 11:45, tamaño: 2MB">
+                                        <td>Persistencia</td>
+                                        <td><span class="badge bg-success">OK</span></td>
+                                        <td>
+                                            Sin errores detectados
+                                            <button class="btn btn-sm btn-outline-info ms-2 btn-detalle">Ver más</button>
+                                            <button class="btn btn-sm btn-outline-warning ms-2 btn-reintentar">Reintentar</button>
+                                        </td>
+                                    </tr>
+                                    <tr data-detalle="Servicios externos: API tiempo de respuesta elevado, último error: 11:40">
+                                        <td>Servicios Externos</td>
+                                        <td><span class="badge bg-warning text-dark">Advertencia</span></td>
+                                        <td>
+                                            Tiempo de respuesta elevado
+                                            <button class="btn btn-sm btn-outline-info ms-2 btn-detalle">Ver más</button>
+                                            <button class="btn btn-sm btn-outline-warning ms-2 btn-reintentar">Reintentar</button>
+                                        </td>
+                                    </tr>
+                                    <tr data-detalle="Archivos verificados, última comprobación: 11:44, sin cambios sospechosos">
+                                        <td>Integridad de Archivos</td>
+                                        <td><span class="badge bg-success">OK</span></td>
+                                        <td>
+                                            Archivos verificados
+                                            <button class="btn btn-sm btn-outline-info ms-2 btn-detalle">Ver más</button>
+                                            <button class="btn btn-sm btn-outline-warning ms-2 btn-reintentar">Reintentar</button>
+                                        </td>
+                                    </tr>
+                                    <tr data-detalle="Logs sin errores recientes, último error: 11:30, tamaño log: 500KB">
+                                        <td>Logs</td>
+                                        <td><span class="badge bg-success">OK</span></td>
+                                        <td>
+                                            Sin errores recientes
+                                            <button class="btn btn-sm btn-outline-info ms-2 btn-detalle">Ver más</button>
+                                            <button class="btn btn-sm btn-outline-warning ms-2 btn-reintentar">Reintentar</button>
+                                        </td>
+                                    </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Historial de Diagnósticos</h4>
+        <div>
+            <a href="/api/diagnostico/history/export?format=csv" class="btn btn-sm btn-outline-primary me-2">Exportar CSV</a>
+            <a href="/api/diagnostico/history/export?format=pdf" class="btn btn-sm btn-outline-danger">Exportar PDF</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered" id="tabla-historial-diagnostico">
+            <thead class="table-light">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Resultados</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- JS genera filas -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/estabilidad_tendencia.js') }}"></script>
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/estabilidad.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/estabilidad_alertas.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/estabilidad_historial.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/estabilidad_detalle.js') }}"></script>
+{% endblock %}

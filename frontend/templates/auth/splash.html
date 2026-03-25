@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargando - ZionX ERP</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e27;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f172a 100%);
+            z-index: -2;
+        }
+        
+        /* Floating particles */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: rgba(59, 130, 246, 0.6);
+            border-radius: 50%;
+            animation: particleFloat 10s infinite;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+        }
+        
+        @keyframes particleFloat {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+        
+        /* Large animated orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+        
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
+            top: -250px;
+            right: -250px;
+        }
+        
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+            bottom: -200px;
+            left: -200px;
+            animation-delay: -10s;
+        }
+        
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -30px) scale(1.1); }
+            66% { transform: translate(-30px, 50px) scale(0.9); }
+        }
+        
+        .splash-container {
+            text-align: center;
+            color: #f1f5f9;
+            animation: fadeIn 1s ease-out;
+            max-width: 500px;
+            max-height: 95vh;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .splash-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .splash-container::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 10px;
+        }
+        
+        .splash-container::-webkit-scrollbar-thumb {
+            background: rgba(59, 130, 246, 0.5);
+            border-radius: 10px;
+        }
+        
+        .splash-logo {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1.2rem;
+            filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.6));
+            animation: logoFloat 3s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+        
+        .splash-title {
+            font-size: 1.8rem;
+            margin-bottom: 0.6rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .splash-subtitle {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+        
+        /* Loading section */
+        .loading-container {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 
+                0 10px 40px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        
+        .loading-percentage {
+            font-weight: 700;
+            font-size: 1.6rem;
+            margin-bottom: 0.8rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .progress-bar-container {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 100px;
+            height: 10px;
+            overflow: hidden;
+            margin-bottom: 1.2rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 100px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 0 20px rgba(59, 130, 246, 0.8),
+                0 0 40px rgba(59, 130, 246, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            to { left: 100%; }
+        }
+        
+        .loading-text {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.6));
+        }
+        
+        .splash-version {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 2.5rem;
+            font-weight: 500;
+        }
+        
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-40px) scale(1.05);
+                filter: blur(10px);
+            }
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Clase para animación de salida */
+        body.page-exit,
+        body.page-exit .splash-container {
+            animation: fadeOut 0.6s cubic-bezier(0.4, 0, 1, 1) forwards !important;
+        }
+        
+        body.page-exit .orb-1,
+        body.page-exit .orb-2 {
+            animation: fadeOut 0.8s ease-out forwards !important;
+        }
+        
+        /* Efecto de ripple al completar carga */
+        @keyframes ripple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .ripple-effect {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            margin: -50px 0 0 -50px;
+            border-radius: 50%;
+            border: 3px solid #3b82f6;
+            animation: ripple 1s ease-out;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        
+        /* Responsive design */
+        @media (max-height: 750px) {
+            .splash-logo { font-size: 3rem; margin-bottom: 1rem; }
+            .splash-title { font-size: 1.5rem; }
+            .splash-subtitle { font-size: 0.85rem; margin-bottom: 2rem; }
+            .loading-container { margin: 1.5rem 0; padding: 1.2rem; }
+            .loading-percentage { font-size: 1.4rem; }
+            .splash-version { margin-top: 2rem; font-size: 0.75rem; }
+        }
+        
+        @media (max-width: 480px) {
+            .splash-container { max-width: 95%; padding: 15px; }
+            .splash-logo { font-size: 2.5rem; }
+            .splash-title { font-size: 1.3rem; }
+            .splash-subtitle { font-size: 0.8rem; }
+            .loading-container { padding: 1rem; border-radius: 14px; }
+            .loading-percentage { font-size: 1.2rem; }
+            .loading-text { font-size: 0.8rem; }
+            .orb-1 { width: 300px; height: 300px; }
+            .orb-2 { width: 250px; height: 250px; }
+        }
+    </style>
+</head>
+<body data-authenticated="{{ is_authenticated|tojson }}">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="splash-container">
+        <div class="splash-logo">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" 
+                 alt="ZionX Logo" 
+                 style="width: 120px; height: 120px; object-fit: contain; display: block; margin: 0 auto 1rem auto; animation: logoFloat 3s ease-in-out infinite;">
+            <div style="font-size: 3rem; font-weight: 800;">ZionX</div>
+        </div>
+        <h1 class="splash-title">Sistema de Gestión Empresarial</h1>
+        <p class="splash-subtitle">Inventario • Ventas • Compras • Contabilidad</p>
+        
+        <div class="loading-container">
+            <div class="loading-percentage" id="percentage">0%</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="loading-text" id="loadingText">
+                <i class="bi bi-hourglass-split loading-spinner"></i>
+                <span>Inicializando sistema...</span>
+            </div>
+        </div>
+        
+        <p class="splash-version">Versión 3.0.0</p>
+    </div>
+
+    <script>
+        // Generate floating particles
+        function createParticles() {
+            const particleCount = 30;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (5 + Math.random() * 10) + 's';
+                document.body.appendChild(particle);
+            }
+        }
+        createParticles();
+    </script>
+    <script>
+        // Auto-redirect si ya está autenticado
+        const isAuthenticated = JSON.parse(document.body.dataset.authenticated);
+        if (isAuthenticated) {
+            window.location.href = "{{ url_for('dashboard.index') }}";
+        }
+        
+        // Sistema de carga con pasos
+        const loadingSteps = [
+            { progress: 15, text: 'Cargando módulos del sistema...', icon: 'bi-grid' },
+            { progress: 30, text: 'Inicializando base de datos...', icon: 'bi-database' },
+            { progress: 45, text: 'Configurando inventario...', icon: 'bi-box-seam' },
+            { progress: 60, text: 'Preparando módulo de ventas...', icon: 'bi-cart-check' },
+            { progress: 75, text: 'Cargando contabilidad...', icon: 'bi-calculator' },
+            { progress: 90, text: 'Verificando conexiones...', icon: 'bi-wifi' },
+            { progress: 100, text: 'Sistema listo', icon: 'bi-check-circle' }
+        ];
+        
+        let currentStep = 0;
+        const progressBar = document.getElementById('progressBar');
+        const loadingText = document.getElementById('loadingText');
+        const percentage = document.getElementById('percentage');
+        
+        function updateProgress() {
+            if (currentStep < loadingSteps.length) {
+                const step = loadingSteps[currentStep];
+                
+                // Actualizar barra de progreso
+                progressBar.style.width = step.progress + '%';
+                percentage.textContent = step.progress + '%';
+                
+                // Actualizar texto con icono
+                loadingText.innerHTML = `
+                    <i class="bi ${step.icon} ${currentStep < loadingSteps.length - 1 ? 'loading-spinner' : ''}"></i>
+                    <span>${step.text}</span>
+                `;
+                
+                currentStep++;
+                
+                // Si llegamos al 100%, redirigir al login
+                if (step.progress === 100) {
+                    // Crear efecto ripple
+                    const ripple = document.createElement('div');
+                    ripple.className = 'ripple-effect';
+                    document.body.appendChild(ripple);
+                    
+                    setTimeout(function() {
+                        // Aplicar animación de salida
+                        document.body.classList.add('page-exit');
+                        
+                        // Redirigir después de la animación
+                        setTimeout(function() {
+                            window.location.href = "{{ url_for('auth.login') }}";
+                        }, 600);
+                    }, 400);
+                } else {
+                    // Continuar con el siguiente paso
+                    const delay = 400 + Math.random() * 400; // Entre 400-800ms
+                    setTimeout(updateProgress, delay);
+                }
+            }
+        }
+        
+        // Iniciar la carga después de un breve delay
+        setTimeout(updateProgress, 500);
+    </script>
+</body>
+</html>

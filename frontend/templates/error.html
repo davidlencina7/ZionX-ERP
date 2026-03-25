@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+
+{% block title %}Error {{ error_code }} - ZionX{% endblock %}
+{% block page_title %}Error {{ error_code }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    border-radius: 20px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--glass-bg, rgba(255,255,255,0.05));
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.error-icon {
+    font-size: 5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+.btn-lg {
+    border-radius: 12px;
+    padding: 12px 32px;
+    transition: all 0.3s ease;
+}
+
+.btn-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2 text-center">
+        <div class="card">
+            <div class="card-body py-5">
+                <i class="bi bi-exclamation-circle text-danger error-icon"></i>
+                <h1 class="display-4 mt-3">Error {{ error_code }}</h1>
+                
+                {% if error_code == 404 %}
+                <p class="lead">Página no encontrada</p>
+                <p class="text-muted">La página que estás buscando no existe o fue movida.</p>
+                {% elif error_code == 500 %}
+                <p class="lead">Error interno del servidor</p>
+                <p class="text-muted">{{ error_message if error_message else 'Ha ocurrido un error inesperado. Por favor, intenta nuevamente.' }}</p>
+                {% else %}
+                <p class="lead">Ha ocurrido un error</p>
+                <p class="text-muted">{{ error_message if error_message else 'Por favor, intenta nuevamente más tarde.' }}</p>
+                {% endif %}
+                
+                <hr class="my-4">
+                
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-house me-2"></i>Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+console.log('🔥 PÁGINA DE ERROR CARGADA - INICIO');
+console.log('🔥 Timestamp:', new Date().toISOString());
+console.log('⚠️ Error detectado: HTTP ' + document.querySelector('h1').textContent);
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== PÁGINA DE ERROR INICIALIZADA ===');
+    
+    // Obtener código de error
+    const errorCode = document.querySelector('h1').textContent.trim();
+    console.log('❌ Código de error:', errorCode);
+    
+    // Obtener mensaje
+    const mensaje = document.querySelector('.lead');
+    if (mensaje) {
+        console.log('📝 Mensaje:', mensaje.textContent.trim());
+    }
+    
+    // Botón de regreso
+    const botonRegreso = document.querySelector('a.btn-primary');
+    console.log('🔙 Botón de regreso disponible:', !!botonRegreso);
+    
+    console.log('=== PÁGINA DE ERROR LISTA ===');
+});
+
+console.log('🔥 PÁGINA DE ERROR CARGADA - FIN');
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+Reporte diagnóstico ZIONX ERP - 2026-03-23 15:40:58
+
+ DIAGNÓSTICO ZIONX ERP - SEMÁFORO 
+==============================
+
+OK
+OK
+
+[EXTRA] Diagnóstico de tablas y columnas clave en PostgreSQL:
+[OK] productos: Todas las columnas clave presentes y tipos correctos.
+[OK] compras: Todas las columnas clave presentes y tipos correctos.
+[OK] ventas: Todas las columnas clave presentes y tipos correctos.
+[OK] usuarios: Todas las columnas clave presentes y tipos correctos.
+[OK] gastos: Todas las columnas clave presentes y tipos correctos.
+[OK] activos: Todas las columnas clave presentes y tipos correctos.
+[OK] accounts: Todas las columnas clave presentes y tipos correctos.
+[OK] journal_entries: Todas las columnas clave presentes y tipos correctos.
+[OK] journal_lines: Todas las columnas clave presentes y tipos correctos.
+[OK] inventory_movements: Todas las columnas clave presentes y tipos correctos.
+[OK] plan_cuentas: Todas las columnas clave presentes y tipos correctos.
+[OK] asientos_contables: Todas las columnas clave presentes y tipos correctos.
+[OK] lineas_asiento: Todas las columnas clave presentes y tipos correctos.
+[OK] movimientos_contables: Todas las columnas clave presentes y tipos correctos.
+[OK] operaciones: Todas las columnas clave presentes y tipos correctos.
+OK (D:\programas vs code\postgreSQL\bin\pg_dump.exe)
+OK
+OK
+OK (importación exitosa)
+
+==============================
+ Pruebas exitosas: 6/6
+ Estado general: 100%
+Advertencias: 0 | Errores: 0
+==============================
+

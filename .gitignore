@@ -1,0 +1,15 @@
+# Archivos y carpetas a ignorar
+.env
+.env.*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+.DS_Store
+node_modules/
+logs/
+*.log
+# Vercel
+.vercel/

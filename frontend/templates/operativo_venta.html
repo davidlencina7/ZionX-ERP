@@ -1,0 +1,362 @@
+{% extends "layout.html" %}
+
+{% block title %}Nueva Venta - ZionX{% endblock %}
+{% block page_title %}🟢 Nueva Venta{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/formularios.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('operativo.nueva_venta') }}" id="formVenta">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    
+    <!-- Selección de Producto -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3 section-title"><i class="bi bi-box-seam me-2"></i>Seleccionar Producto</h4>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="producto-card card" data-producto="pollo entero">
+                <div class="card-body text-center">
+                    <div class="producto-icon">🐔</div>
+                    Pollo entero
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="producto-card card" data-producto="pata muslo">
+                <div class="card-body text-center">
+                    <div class="producto-icon">🍗</div>
+                    Pata muslo
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="producto-card card" data-producto="maple huevo">
+                <div class="card-body text-center">
+                    <div class="producto-icon">📦</div>
+                    Maple huevo
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="producto-card card" data-producto="huevo unidad">
+                <div class="card-body text-center">
+                    <div class="producto-icon">🥚</div>
+                    Huevo unidad
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <input type="hidden" name="producto" id="producto" required>
+    
+    <!-- Cantidad y Monto -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3 section-title"><i class="bi bi-currency-dollar me-2"></i>A cobrar al cliente</h4>
+        </div>
+        <div class="col-md-6">
+            <input type="number" class="form-control cantidad-input" name="monto" id="monto" 
+                   placeholder="0.00" min="0.01" step="0.01" required>
+            
+            <div class="mt-3">
+                <label class="form-label fw-bold">Cantidad:</label>
+                <div class="d-flex gap-3 mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="unidad_medida" id="unidad_kg" value="kg" checked>
+                        <label class="form-check-label" for="unidad_kg">
+                            Kilogramos (kg)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="unidad_medida" id="unidad_unidades" value="unidad">
+                        <label class="form-check-label" for="unidad_unidades">
+                            Unidades
+                        </label>
+                    </div>
+                </div>
+                <input type="number" class="form-control cantidad-secundaria" name="cantidad" id="cantidad" 
+                       placeholder="Cantidad calculada automáticamente" min="0.01" step="0.01" required>
+                
+                <!-- Campo adicional para unidades del inventario cuando se vende por kg -->
+                <div id="unidades-inventario-container" class="mt-3" style="display: block;">
+                    <label class="form-label fw-bold text-warning">
+                        <i class="bi bi-box-seam me-1"></i>Unidades a descontar del inventario:
+                    </label>
+                    <input type="number" class="form-control" name="unidades_inventario" id="unidades_inventario" 
+                           placeholder="¿Cuántos pollos/unidades?" min="1" step="1" value="1" required>
+                    <small class="form-text text-muted">
+                        Ej: Si vendes 2.3 kg pero es 1 pollo, indica: 1
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="alert alert-info mb-0 h-100 d-flex align-items-center">
+                <div>
+                    <strong>Stock disponible:</strong> <span id="stock-disponible">-</span><br>
+                    <strong>Precio unitario:</strong> $<span id="precio-unitario">-</span><br>
+                    <strong>Total calculado:</strong> <span id="total-cobrar">$-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Forma de pago -->
+    <!-- Forma de Pago -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h4 class="mb-3 section-title"><i class="bi bi-wallet2 me-2"></i>Forma de Pago</h4>
+            <div class="d-flex flex-wrap gap-3 justify-content-between">
+                <button type="button" class="btn btn-outline-primary btn-lg flex-fill forma-pago-btn" data-forma="efectivo">
+                    <i class="bi bi-cash-coin me-2"></i>EFECTIVO
+                </button>
+                <button type="button" class="btn btn-outline-info btn-lg flex-fill forma-pago-btn" data-forma="transferencia">
+                    <i class="bi bi-bank me-2"></i>TRANSFERENCIA
+                </button>
+                <button type="button" class="btn btn-outline-success btn-lg flex-fill forma-pago-btn" data-forma="debito">
+                    <i class="bi bi-credit-card-2-front me-2"></i>DÉBITO
+                </button>
+                <button type="button" class="btn btn-outline-warning btn-lg flex-fill forma-pago-btn" data-forma="credito">
+                    <i class="bi bi-credit-card me-2"></i>CRÉDITO
+                </button>
+            </div>
+            <input type="hidden" name="forma_pago" id="forma_pago" value="efectivo">
+        </div>
+    </div>
+    
+    <!-- Botón de registro -->
+    <div class="row">
+        <div class="col-12">
+            <button type="submit" class="btn btn-success btn-registrar w-100">
+                <i class="bi bi-check-circle me-2"></i>Registrar Venta
+            </button>
+        </div>
+    </div>
+    
+    <div class="row mt-3">
+        <div class="col-12">
+            <a href="{{ url_for('operativo.index') }}" class="btn btn-secondary btn-lg w-100">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Selector visual de forma de pago
+document.addEventListener('DOMContentLoaded', function() {
+    const formaBtns = document.querySelectorAll('.forma-pago-btn');
+    const formaInput = document.getElementById('forma_pago');
+    if (formaBtns && formaInput) {
+        formaBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                formaBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                formaInput.value = this.getAttribute('data-forma');
+            });
+        });
+        // Por defecto, marcar efectivo
+        formaBtns[0].classList.add('active');
+    }
+});
+console.log('🔥 SCRIPT CARGADO - INICIO');
+console.log('🔥 Timestamp:', new Date().toISOString());
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== INICIANDO MÓDULO OPERATIVO VENTA ===');
+    console.log('DOMContentLoaded disparado');
+    
+    // Datos de productos
+    try {
+        const productosData = {{ productos | tojson | safe }};
+        console.log('📦 Datos de productos cargados OK');
+        console.log('📦 productosData:', productosData);
+        console.log('📦 Tipo de productosData:', typeof productosData);
+        console.log('📦 Keys de productos:', Object.keys(productosData));
+    } catch (error) {
+        console.error('❌ ERROR al cargar productosData:', error);
+        return;
+    }
+    
+    const productosData = {{ productos | tojson | safe }};
+    
+    // Verificar elementos del DOM
+    const productoCards = document.querySelectorAll('.producto-card');
+    console.log('🎴 Tarjetas de producto encontradas:', productoCards.length);
+    productoCards.forEach((card, index) => {
+        console.log(`  Tarjeta ${index + 1}:`, {
+            dataset: card.dataset.producto,
+            html: card.innerHTML.substring(0, 50)
+        });
+    });
+    
+    // Eliminada lógica de forma_pago (botones y dataset)
+    
+    // Selección de producto
+    productoCards.forEach((card, index) => {
+        console.log(`➕ Agregando event listener a tarjeta ${index + 1}`);
+        card.addEventListener('click', function() {
+            console.log('🖱️ CLICK en tarjeta de producto');
+            console.log('  Dataset producto:', this.dataset.producto);
+            
+            // Remover selección anterior
+            document.querySelectorAll('.producto-card').forEach(c => {
+                c.classList.remove('selected');
+                console.log('  ❌ Removiendo selected de:', c.dataset.producto);
+            });
+            
+            // Seleccionar este
+            this.classList.add('selected');
+            const producto = this.dataset.producto;
+            console.log('  ✅ Producto seleccionado:', producto);
+            
+            document.getElementById('producto').value = producto;
+            console.log('  📝 Campo hidden actualizado:', document.getElementById('producto').value);
+            
+            // Actualizar info
+            if (productosData[producto]) {
+                console.log('  ℹ️ Datos del producto encontrados:', productosData[producto]);
+                document.getElementById('stock-disponible').textContent = productosData[producto].stock;
+                document.getElementById('precio-unitario').textContent = productosData[producto].precio.toFixed(2);
+                // Resetear campos
+                document.getElementById('total-cobrar').textContent = '$-';
+                document.getElementById('monto').value = '';
+                document.getElementById('cantidad').value = '';
+                console.log('  ✅ Info actualizada en pantalla');
+            } else {
+                console.error('  ❌ Producto NO encontrado en productosData!');
+                console.log('  🔍 Buscando:', producto);
+                console.log('  📋 Disponibles:', Object.keys(productosData));
+            }
+            
+            // Focus en monto
+            document.getElementById('monto').focus();
+            console.log('  🎯 Focus en campo monto');
+        });
+    });
+
+    // Calcular cantidad cuando se ingresa el monto a cobrar
+    const montoInput = document.getElementById('monto');
+    const cantidadInput = document.getElementById('cantidad');
+    
+    montoInput.addEventListener('input', function() {
+        const monto = parseFloat(this.value);
+        const producto = document.getElementById('producto').value;
+        
+        if (producto && productosData[producto] && !isNaN(monto) && monto > 0) {
+            const precio = productosData[producto].precio;
+            const cantidadCalculada = monto / precio;
+            cantidadInput.value = cantidadCalculada.toFixed(2);
+            document.getElementById('total-cobrar').textContent = monto.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 });
+        } else {
+            cantidadInput.value = '';
+            document.getElementById('total-cobrar').textContent = '$-';
+        }
+    });
+    
+    // También permitir calcular monto cuando se ingresa cantidad manualmente
+    cantidadInput.addEventListener('input', function() {
+        const cantidad = parseFloat(this.value);
+        const producto = document.getElementById('producto').value;
+        let total = 0;
+        if (producto && productosData[producto]) {
+            const precio = productosData[producto].precio;
+            if (!isNaN(cantidad) && cantidad > 0) {
+                total = cantidad * precio;
+                // Formatear como moneda
+                document.getElementById('total-cobrar').textContent = total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 });
+            } else {
+                document.getElementById('total-cobrar').textContent = '$-';
+            }
+        } else {
+            document.getElementById('total-cobrar').textContent = '$-';
+        }
+    });
+    
+    // Selección de forma de pago
+    // Eliminada lógica de selección de forma_pago
+    
+    // Control de visibilidad del campo unidades_inventario según unidad de medida
+    const unidadKgRadio = document.getElementById('unidad_kg');
+    const unidadUnidadesRadio = document.getElementById('unidad_unidades');
+    const unidadesInventarioContainer = document.getElementById('unidades-inventario-container');
+    const unidadesInventarioInput = document.getElementById('unidades_inventario');
+    
+    function actualizarCampoUnidadesInventario() {
+        if (unidadKgRadio.checked) {
+            // Mostrar campo cuando se vende por kg
+            unidadesInventarioContainer.style.display = 'block';
+            unidadesInventarioInput.required = true;
+            console.log('📦 Campo unidades_inventario VISIBLE (venta por kg)');
+        } else {
+            // Ocultar campo cuando se vende por unidades
+            unidadesInventarioContainer.style.display = 'none';
+            unidadesInventarioInput.required = false;
+            // Sincronizar: si vende por unidades, el valor del campo cantidad es lo que se descuenta
+            console.log('📦 Campo unidades_inventario OCULTO (venta por unidades)');
+        }
+    }
+    
+    // Event listeners para los radio buttons
+    unidadKgRadio.addEventListener('change', actualizarCampoUnidadesInventario);
+    unidadUnidadesRadio.addEventListener('change', actualizarCampoUnidadesInventario);
+    
+    // Inicializar estado
+    actualizarCampoUnidadesInventario();
+    
+    // Validación del formulario
+    document.getElementById('formVenta').addEventListener('submit', function(e) {
+        console.log('📤 SUBMIT del formulario');
+        console.log('  Producto:', document.getElementById('producto').value);
+        console.log('  Monto:', document.getElementById('monto').value);
+        console.log('  Cantidad:', document.getElementById('cantidad').value);
+        // Validación de forma_pago eliminada
+        if (!document.getElementById('producto').value) {
+            e.preventDefault();
+            console.error('❌ Validación falló: No hay producto seleccionado');
+            alert('Por favor selecciona un producto');
+            return;
+        }
+        
+        // Validar stock según el tipo de venta
+        const unidadMedida = document.querySelector('input[name="unidad_medida"]:checked').value;
+        const cantidad = parseFloat(document.getElementById('cantidad').value);
+        const producto = document.getElementById('producto').value;
+        const stock = productosData[producto]?.stock || 0;
+        
+        let cantidadAValidar;
+        if (unidadMedida === 'kg') {
+            // Si vende por kg, validar las unidades físicas del inventario
+            cantidadAValidar = parseFloat(document.getElementById('unidades_inventario').value);
+            console.log('  Validando stock para venta por kg:');
+            console.log('    - Peso vendido:', cantidad, 'kg');
+            console.log('    - Unidades a descontar:', cantidadAValidar);
+        } else {
+            // Si vende por unidades, validar la cantidad directamente
+            cantidadAValidar = cantidad;
+            console.log('  Validando stock para venta por unidades:', cantidadAValidar);
+        }
+        
+        if (cantidadAValidar > stock) {
+            e.preventDefault();
+            console.error('❌ Validación falló: Stock insuficiente');
+            console.log('  Unidades solicitadas:', cantidadAValidar);
+            console.log('  Stock disponible:', stock);
+            alert(`Stock insuficiente. Disponible: ${stock} unidades`);
+            return;
+        }
+        
+        console.log('✅ Validación OK, enviando formulario...');
+    });
+    
+    console.log('=== INICIALIZACIÓN COMPLETADA ===');
+});
+
+console.log('🔥 SCRIPT CARGADO - FIN');
+</script>
+{% endblock %}

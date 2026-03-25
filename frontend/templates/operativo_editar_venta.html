@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block title %}Editar Venta - ZionX{% endblock %}
+{% block page_title %}Editar Venta{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Editar Venta</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    
+                    <div class="mb-4">
+                        <label class="form-label"><i class="bi bi-box-seam me-2"></i><strong>Producto</strong></label>
+                        <input type="text" class="form-control" value="{{ producto.nombre }}" disabled>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="fecha" class="form-label"><i class="bi bi-calendar3 me-2"></i><strong>Fecha y Hora</strong></label>
+                        <input type="datetime-local" 
+                               class="form-control" 
+                               id="fecha" 
+                               name="fecha" 
+                               value="{{ venta.fecha[:16] if venta.fecha|length >= 16 else venta.fecha }}" 
+                               required>
+                        <small class="text-muted">Formato: dd/mm/aaaa hh:mm</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="cantidad" class="form-label"><i class="bi bi-123 me-2"></i><strong>Cantidad</strong></label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="cantidad" 
+                               name="cantidad" 
+                               value="{{ venta.cantidad }}" 
+                               step="0.01" 
+                               min="0.01" 
+                               required>
+                        <small class="text-muted">Stock disponible: {{ producto.stock + venta.cantidad }}</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="precio_unitario" class="form-label"><i class="bi bi-currency-dollar me-2"></i><strong>Precio Unitario</strong></label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="precio_unitario" 
+                               name="precio_unitario" 
+                               value="{{ venta.precio_unitario }}" 
+                               step="0.01" 
+                               min="0" 
+                               required>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <small>
+                            <strong>Nota:</strong> Al cambiar la cantidad, el stock se ajustará automáticamente.
+                        </small>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            <i class="bi bi-check-circle"></i> Guardar Cambios
+                        </button>
+                        <a href="{{ url_for('operativo.index') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
